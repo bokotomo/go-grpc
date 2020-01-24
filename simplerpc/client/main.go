@@ -8,7 +8,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	pb "grpc-sample/simplerpc/helloworld"
+	pb "grpc-sample/pb/calc"
 
 	"google.golang.org/grpc"
 )
@@ -21,19 +21,20 @@ func getAdress() string {
 	return fmt.Sprintf("%s:%s", host, port)
 }
 
-func exec(message string) error {
+func exec(a, b int32) error {
 	address := getAdress()
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return errors.Wrap(err, "did not connect")
 	}
 	defer conn.Close()
-	client := pb.NewGreeterClient(conn)
+	client := pb.NewCalcClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	reply, err := client.SayHello(ctx, &pb.HelloRequest{
-		Name: message,
+	reply, err := client.Sum(ctx, &pb.SumRequest{
+		A: a,
+		B: b,
 	})
 	if err != nil {
 		return errors.Wrap(err, "could not greet")
@@ -43,6 +44,5 @@ func exec(message string) error {
 }
 
 func main() {
-	message := "メッセージ内容"
-	exec(message)
+	exec(300, 500)
 }

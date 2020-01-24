@@ -6,7 +6,7 @@ import (
 	"log"
 	"net"
 
-	pb "grpc-sample/simplerpc/helloworld"
+	pb "grpc-sample/pb/calc"
 
 	"google.golang.org/grpc"
 )
@@ -15,16 +15,16 @@ const (
 	port = ":50051"
 )
 
-// server is used to implement helloworld.GreeterServer.
 type server struct {
-	pb.UnimplementedGreeterServer
+	pb.UnimplementedCalcServer
 }
 
-// SayHello implements helloworld.GreeterServer
-func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
-	log.Printf("%v", in.GetName())
-	reply := fmt.Sprintf("「%s」を受け取ったので、お返しします。", in.GetName())
-	return &pb.HelloReply{Message: reply}, nil
+func (s *server) Sum(ctx context.Context, in *pb.SumRequest) (*pb.SumReply, error) {
+	a := in.GetA()
+	b := in.GetB()
+	log.Printf("%v, %v", a, b)
+	reply := fmt.Sprintf("%d + %d = %d", a, b, a+b)
+	return &pb.SumReply{Message: reply}, nil
 }
 
 func main() {
@@ -33,7 +33,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	pb.RegisterGreeterServer(s, &server{})
+	pb.RegisterCalcServer(s, &server{})
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

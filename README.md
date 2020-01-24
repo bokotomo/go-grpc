@@ -1,7 +1,22 @@
 # grpc-go
+GRPCの実行サンプル
 
-## simple rpc
+## 動かし方
+```
+cd ./infrastructure/docker
+docker-compose up -d
+docker-compose exec go-grpc bash
+```
+
+## Simple RPC
+２つのターミナルで、serverとclientを実行
 ```
 go run ./simplerpc/server/
 go run ./simplerpc/client/
+```
+
+## create pb
+```
+// simplerpc
+protoc --proto_path ./proto --go_out=plugins=grpc:./pb/calc calc.proto
 ```
