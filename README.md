@@ -17,6 +17,7 @@ go run ./simplerpc/client/
 
 ## create pb
 ```
-// simplerpc
-protoc --proto_path ./proto --go_out=plugins=grpc:./pb/calc calc.proto
+// simplerpc 足算
+make protoc OUT=./pb/calc NAME=calc.proto
 ```
+
