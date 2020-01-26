@@ -9,28 +9,32 @@ docker-compose exec go-grpc bash
 ```
 
 ## unaryr RPC
-２つのターミナルで、serverとclientを実行
+２つのターミナルで、serverとclientを実行   
+２つの数字を送ったら加算するやつを実装
 ```
 go run ./app/unaryrpc/server/
 go run ./app/unaryrpc/client/
 ```
 
 ## Server Streaming RPC
-２つのターミナルで、serverとclientを実行
+２つのターミナルで、serverとclientを実行  
+サーバから値を連続で送るのを実装
 ```
 go run ./app/serverside/server/
 go run ./app/serverside/client/
 ```
 
 ## Client Streaming RPC
-２つのターミナルで、serverとclientを実行
+２つのターミナルで、serverとclientを実行  
+クライアントから値を送ったら合計するやつを実装
 ```
 go run ./app/clientside/server/
 go run ./app/clientside/client/
 ```
 
 ## Bidirectional Streaming RPC
-２つのターミナルで、serverとclientを実行
+２つのターミナルで、serverとclientを実行  
+チャットっぽいの実装
 ```
 go run ./app/bidirectional/server/
 go run ./app/bidirectional/client/

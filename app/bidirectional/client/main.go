@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -21,11 +22,7 @@ func getAdress() string {
 	return fmt.Sprintf("%s:%s", host, port)
 }
 
-func request(client pb.ChatClient) error {
-	stream, err := client.Chat(context.Background())
-	if err != nil {
-		return err
-	}
+func receive(stream pb.Chat_ChatClient) error {
 	waitc := make(chan struct{})
 	go func() {
 		for {
@@ -38,17 +35,35 @@ func request(client pb.ChatClient) error {
 				log.Fatalf("エラー: %v", err)
 			}
 			log.Printf("サーバから：%s", in.Message)
+
+			// お返し
+			stream.Send(&pb.ChatRequest{
+				Message: time.Now().Format("2006-01-02 15:04:05"),
+			})
 		}
 	}()
+	<-waitc
+	return nil
+}
 
-	if err := stream.Send(&pb.ChatRequest{
+func request(stream pb.Chat_ChatClient) error {
+	return stream.Send(&pb.ChatRequest{
 		Message: "こんにちは",
-	}); err != nil {
+	})
+}
+
+func chat(client pb.ChatClient) error {
+	stream, err := client.Chat(context.Background())
+	if err != nil {
 		return err
 	}
-
+	if err := request(stream); err != nil {
+		return err
+	}
+	if err := receive(stream); err != nil {
+		return err
+	}
 	stream.CloseSend()
-	<-waitc
 	return nil
 }
 
@@ -60,7 +75,7 @@ func exec() error {
 	}
 	defer conn.Close()
 	client := pb.NewChatClient(conn)
-	return request(client)
+	return chat(client)
 }
 
 func main() {

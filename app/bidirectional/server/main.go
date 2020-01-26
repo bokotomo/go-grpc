@@ -30,7 +30,8 @@ func (s *server) Chat(stream pb.Chat_ChatServer) error {
 			return err
 		}
 		fmt.Println("受取：", in.GetMessage())
-		message := fmt.Sprintf("%sをうけたったよ", in.GetMessage())
+
+		message := fmt.Sprintf("%sを受け取ったよ！ありがとう＾＾", in.GetMessage())
 		if err := stream.Send(&pb.ChatReply{
 			Message: message,
 		}); err != nil {
