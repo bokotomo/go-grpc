@@ -25,7 +25,7 @@ func getAdress() string {
 func request(client pb.UploadClient) error {
 	stream, err := client.Upload(context.Background())
 	if err != nil {
-		log.Fatalf("%v.RecordRoute(_) = _, %v", client, err)
+		return err
 	}
 	values := []int32{1, 2, 3, 4, 5}
 	for _, value := range values {

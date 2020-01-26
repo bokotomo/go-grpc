@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"time"
@@ -19,10 +20,17 @@ type server struct {
 	pb.UnimplementedChatServer
 }
 
-func (s *server) Chat(req *pb.ChatRequest, stream pb.Chat_ChatServer) error {
-	fmt.Println("リクエスト受け取った")
-	for i := int32(0); i < req.GetNum(); i++ {
-		message := fmt.Sprintf("%d", i)
+func (s *server) Chat(stream pb.Chat_ChatServer) error {
+	for {
+		in, err := stream.Recv()
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Println("受取：", in.GetMessage())
+		message := fmt.Sprintf("%sをうけたったよ", in.GetMessage())
 		if err := stream.Send(&pb.ChatReply{
 			Message: message,
 		}); err != nil {
@@ -30,7 +38,6 @@ func (s *server) Chat(req *pb.ChatRequest, stream pb.Chat_ChatServer) error {
 		}
 		time.Sleep(time.Second * 1)
 	}
-	return nil
 }
 
 func main() {
