@@ -14,14 +14,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-func getAdress() string {
-	const (
-		host = "localhost"
-		port = "50051"
-	)
-	return fmt.Sprintf("%s:%s", host, port)
-}
-
 func request(client pb.UploadClient) error {
 	stream, err := client.Upload(context.Background())
 	if err != nil {
@@ -45,12 +37,11 @@ func request(client pb.UploadClient) error {
 		return err
 	}
 	log.Printf("結果: %v", reply)
-
 	return nil
 }
 
 func exec() error {
-	address := getAdress()
+	address := "localhost:50051"
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return errors.Wrap(err, "コネクションエラー")

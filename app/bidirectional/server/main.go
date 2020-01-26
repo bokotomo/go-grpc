@@ -9,18 +9,26 @@ import (
 
 	pb "grpc-sample/pb/chat"
 
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 )
 
-const (
-	port = ":50051"
-)
+const port = ":50051"
 
-type server struct {
+// ServerBidirectional is server
+type ServerBidirectional struct {
 	pb.UnimplementedChatServer
 }
 
-func (s *server) Chat(stream pb.Chat_ChatServer) error {
+func request(stream pb.Chat_ChatServer, message string) error {
+	reply := fmt.Sprintf("%sを受け取ったよ！ありがとう＾＾", message)
+	return stream.Send(&pb.ChatReply{
+		Message: reply,
+	})
+}
+
+// Chat is
+func (s *ServerBidirectional) Chat(stream pb.Chat_ChatServer) error {
 	for {
 		in, err := stream.Recv()
 		if err == io.EOF {
@@ -29,26 +37,32 @@ func (s *server) Chat(stream pb.Chat_ChatServer) error {
 		if err != nil {
 			return err
 		}
-		fmt.Println("受取：", in.GetMessage())
+		message := in.GetMessage()
+		fmt.Println("受取：", message)
 
-		message := fmt.Sprintf("%sを受け取ったよ！ありがとう＾＾", in.GetMessage())
-		if err := stream.Send(&pb.ChatReply{
-			Message: message,
-		}); err != nil {
+		if err := request(stream, message); err != nil {
 			return err
 		}
 		time.Sleep(time.Second * 1)
 	}
 }
 
-func main() {
+func set() error {
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		return errors.Wrap(err, "ポート失敗")
 	}
 	s := grpc.NewServer()
-	pb.RegisterChatServer(s, &server{})
+	var server ServerBidirectional
+	pb.RegisterChatServer(s, &server)
 	if err := s.Serve(lis); err != nil {
-		log.Fatalf("サーバ起動失敗: %v", err)
+		return errors.Wrap(err, "サーバ起動失敗")
+	}
+	return nil
+}
+
+func main() {
+	if err := set(); err != nil {
+		log.Fatalf("%v", err)
 	}
 }

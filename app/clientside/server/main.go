@@ -8,18 +8,19 @@ import (
 
 	pb "grpc-sample/pb/upload"
 
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 )
 
-const (
-	port = ":50051"
-)
+const port = ":50051"
 
-type server struct {
+// ServerClientSide is servre
+type ServerClientSide struct {
 	pb.UnimplementedUploadServer
 }
 
-func (s *server) Upload(stream pb.Upload_UploadServer) error {
+// Upload is
+func (s *ServerClientSide) Upload(stream pb.Upload_UploadServer) error {
 	var sum int32
 	for {
 		req, err := stream.Recv()
@@ -37,14 +38,22 @@ func (s *server) Upload(stream pb.Upload_UploadServer) error {
 	}
 }
 
-func main() {
+func set() error {
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		return errors.Wrap(err, "ポート失敗")
 	}
 	s := grpc.NewServer()
-	pb.RegisterUploadServer(s, &server{})
+	var server ServerClientSide
+	pb.RegisterUploadServer(s, &server)
 	if err := s.Serve(lis); err != nil {
-		log.Fatalf("サーバ起動失敗: %v", err)
+		return errors.Wrap(err, "サーバ起動失敗")
+	}
+	return nil
+}
+
+func main() {
+	if err := set(); err != nil {
+		log.Fatalf("%v", err)
 	}
 }

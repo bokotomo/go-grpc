@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log"
 	"time"
@@ -13,14 +12,6 @@ import (
 
 	"google.golang.org/grpc"
 )
-
-func getAdress() string {
-	const (
-		host = "localhost"
-		port = "50051"
-	)
-	return fmt.Sprintf("%s:%s", host, port)
-}
 
 func receive(stream pb.Chat_ChatClient) error {
 	waitc := make(chan struct{})
@@ -68,7 +59,7 @@ func chat(client pb.ChatClient) error {
 }
 
 func exec() error {
-	address := getAdress()
+	address := "localhost:50051"
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return errors.Wrap(err, "コネクションエラー")

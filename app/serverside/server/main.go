@@ -8,18 +8,19 @@ import (
 
 	pb "grpc-sample/pb/notification"
 
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 )
 
-const (
-	port = ":50051"
-)
+const port = ":50051"
 
-type server struct {
+// ServerServerSide is server
+type ServerServerSide struct {
 	pb.UnimplementedNotificationServer
 }
 
-func (s *server) Notification(req *pb.NotificationRequest, stream pb.Notification_NotificationServer) error {
+// Notification is
+func (s *ServerServerSide) Notification(req *pb.NotificationRequest, stream pb.Notification_NotificationServer) error {
 	fmt.Println("リクエスト受け取った")
 	for i := int32(0); i < req.GetNum(); i++ {
 		message := fmt.Sprintf("%d", i)
@@ -33,14 +34,22 @@ func (s *server) Notification(req *pb.NotificationRequest, stream pb.Notificatio
 	return nil
 }
 
-func main() {
+func set() error {
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		return errors.Wrap(err, "ポート失敗")
 	}
 	s := grpc.NewServer()
-	pb.RegisterNotificationServer(s, &server{})
+	var server ServerServerSide
+	pb.RegisterNotificationServer(s, &server)
 	if err := s.Serve(lis); err != nil {
-		log.Fatalf("サーバ起動失敗: %v", err)
+		return errors.Wrap(err, "サーバ起動失敗")
+	}
+	return nil
+}
+
+func main() {
+	if err := set(); err != nil {
+		log.Fatalf("%v", err)
 	}
 }

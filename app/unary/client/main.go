@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -13,29 +12,17 @@ import (
 	"google.golang.org/grpc"
 )
 
-func getAdress() string {
-	const (
-		host = "localhost"
-		port = "50051"
+func request(client pb.CalcClient, a, b int32) error {
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		time.Second,
 	)
-	return fmt.Sprintf("%s:%s", host, port)
-}
-
-func exec(a, b int32) error {
-	address := getAdress()
-	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
-	if err != nil {
-		return errors.Wrap(err, "コネクションエラー")
-	}
-	defer conn.Close()
-	client := pb.NewCalcClient(conn)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	reply, err := client.Sum(ctx, &pb.SumRequest{
+	sumRequest := pb.SumRequest{
 		A: a,
 		B: b,
-	})
+	}
+	reply, err := client.Sum(ctx, &sumRequest)
 	if err != nil {
 		return errors.Wrap(err, "受取り失敗")
 	}
@@ -43,6 +30,25 @@ func exec(a, b int32) error {
 	return nil
 }
 
+func sum(a, b int32) error {
+	address := "localhost:50051"
+	conn, err := grpc.Dial(
+		address,
+		grpc.WithInsecure(),
+		grpc.WithBlock(),
+	)
+	if err != nil {
+		return errors.Wrap(err, "コネクションエラー")
+	}
+	defer conn.Close()
+	client := pb.NewCalcClient(conn)
+	return request(client, a, b)
+}
+
 func main() {
-	exec(300, 500)
+	a := int32(300)
+	b := int32(500)
+	if err := sum(a, b); err != nil {
+		log.Fatalf("%v", err)
+	}
 }
