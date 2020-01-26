@@ -20,17 +20,20 @@ type server struct {
 }
 
 func (s *server) Upload(stream pb.Upload_UploadServer) error {
+	var sum int32
 	for {
-		point, err := stream.Recv()
+		req, err := stream.Recv()
 		if err == io.EOF {
+			message := fmt.Sprintf("DONE: sum = %d", sum)
 			return stream.SendAndClose(&pb.UploadReply{
-				Message: "OK",
+				Message: message,
 			})
 		}
 		if err != nil {
 			return err
 		}
-		fmt.Println(point.GetValue())
+		fmt.Println(req.GetValue())
+		sum += req.GetValue()
 	}
 }
 

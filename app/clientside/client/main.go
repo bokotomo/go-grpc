@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -21,41 +22,46 @@ func getAdress() string {
 	return fmt.Sprintf("%s:%s", host, port)
 }
 
-func request(client pb.UploadClient, num int32) error {
-	req := &pb.UploadRequest{
-		Num: num,
-	}
-	stream, err := client.Upload(context.Background(), req)
+func request(client pb.UploadClient) error {
+	stream, err := client.Upload(context.Background())
 	if err != nil {
-		return errors.Wrap(err, "streamエラー")
+		log.Fatalf("%v.RecordRoute(_) = _, %v", client, err)
 	}
-	for {
-		reply, err := stream.Recv()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
+	values := []int32{1, 2, 3, 4, 5}
+	for _, value := range values {
+		fmt.Println("送る値:", value)
+		if err := stream.Send(&pb.UploadRequest{
+			Value: value,
+		}); err != nil {
+			if err == io.EOF {
+				break
+			}
 			return err
 		}
-		log.Println("これ：", reply.GetMessage())
+		time.Sleep(time.Second * 1)
 	}
+	reply, err := stream.CloseAndRecv()
+	if err != nil {
+		return err
+	}
+	log.Printf("結果: %v", reply)
+
 	return nil
 }
 
-func exec(num int32) error {
+func exec() error {
 	address := getAdress()
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return errors.Wrap(err, "コネクションエラー")
 	}
 	defer conn.Close()
-	client := pb.NewNotificationClient(conn)
-	return request(client, num)
+	client := pb.NewUploadClient(conn)
+	return request(client)
 }
 
 func main() {
-	num := int32(5)
-	if err := exec(num); err != nil {
+	if err := exec(); err != nil {
 		log.Println(err)
 	}
 }
