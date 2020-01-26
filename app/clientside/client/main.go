@@ -8,7 +8,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	pb "grpc-sample/pb/notification"
+	pb "grpc-sample/pb/upload"
 
 	"google.golang.org/grpc"
 )
@@ -21,11 +21,11 @@ func getAdress() string {
 	return fmt.Sprintf("%s:%s", host, port)
 }
 
-func request(client pb.NotificationClient, num int32) error {
-	req := &pb.NotificationRequest{
+func request(client pb.UploadClient, num int32) error {
+	req := &pb.UploadRequest{
 		Num: num,
 	}
-	stream, err := client.Notification(context.Background(), req)
+	stream, err := client.Upload(context.Background(), req)
 	if err != nil {
 		return errors.Wrap(err, "streamエラー")
 	}

@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net"
-	"time"
 
-	pb "grpc-sample/pb/notification"
+	pb "grpc-sample/pb/upload"
 
 	"google.golang.org/grpc"
 )
@@ -16,21 +16,22 @@ const (
 )
 
 type server struct {
-	pb.UnimplementedNotificationServer
+	pb.UnimplementedUploadServer
 }
 
-func (s *server) Notification(req *pb.NotificationRequest, stream pb.Notification_NotificationServer) error {
-	fmt.Println("リクエスト受け取った")
-	for i:=int32(0);i<req.GetNum();i++ {
-		message := fmt.Sprintf("%d", i)
-		if err := stream.Send(&pb.NotificationReply{
-			Message: message,
-		}); err != nil {
+func (s *server) Upload(stream pb.Upload_UploadServer) error {
+	for {
+		point, err := stream.Recv()
+		if err == io.EOF {
+			return stream.SendAndClose(&pb.UploadReply{
+				Message: "OK",
+			})
+		}
+		if err != nil {
 			return err
 		}
-		time.Sleep(time.Second * 1)
+		fmt.Println(point.GetValue())
 	}
-	return nil
 }
 
 func main() {
@@ -39,7 +40,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	pb.RegisterNotificationServer(s, &server{})
+	pb.RegisterUploadServer(s, &server{})
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("サーバ起動失敗: %v", err)
 	}

@@ -6,7 +6,7 @@ import (
 	"net"
 	"time"
 
-	pb "grpc-sample/pb/notification"
+	pb "grpc-sample/pb/chat"
 
 	"google.golang.org/grpc"
 )
@@ -16,14 +16,14 @@ const (
 )
 
 type server struct {
-	pb.UnimplementedNotificationServer
+	pb.UnimplementedChatServer
 }
 
-func (s *server) Notification(req *pb.NotificationRequest, stream pb.Notification_NotificationServer) error {
+func (s *server) Chat(req *pb.ChatRequest, stream pb.Chat_ChatServer) error {
 	fmt.Println("リクエスト受け取った")
-	for i:=int32(0);i<req.GetNum();i++ {
+	for i := int32(0); i < req.GetNum(); i++ {
 		message := fmt.Sprintf("%d", i)
-		if err := stream.Send(&pb.NotificationReply{
+		if err := stream.Send(&pb.ChatReply{
 			Message: message,
 		}); err != nil {
 			return err
@@ -39,7 +39,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	pb.RegisterNotificationServer(s, &server{})
+	pb.RegisterChatServer(s, &server{})
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("サーバ起動失敗: %v", err)
 	}
