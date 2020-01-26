@@ -19,5 +19,6 @@ go run ./simplerpc/client/
 ```
 // simplerpc 足算
 make protoc OUT=./pb/calc NAME=calc.proto
+make protoc OUT=./pb/notification NAME=notification.proto
 ```
 

@@ -25,7 +25,7 @@ func exec(a, b int32) error {
 	address := getAdress()
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		return errors.Wrap(err, "did not connect")
+		return errors.Wrap(err, "コネクションエラー")
 	}
 	defer conn.Close()
 	client := pb.NewCalcClient(conn)
@@ -37,7 +37,7 @@ func exec(a, b int32) error {
 		B: b,
 	})
 	if err != nil {
-		return errors.Wrap(err, "could not greet")
+		return errors.Wrap(err, "受取り失敗")
 	}
 	log.Printf("サーバからの受け取り\n %s", reply.GetMessage())
 	return nil
