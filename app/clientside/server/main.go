@@ -19,7 +19,7 @@ type ServerClientSide struct {
 	pb.UnimplementedUploadServer
 }
 
-// Upload is
+// Upload 複数の送られてきた数字を合計する
 func (s *ServerClientSide) Upload(stream pb.Upload_UploadServer) error {
 	var sum int32
 	for {
@@ -53,6 +53,7 @@ func set() error {
 }
 
 func main() {
+	fmt.Println("起動")
 	if err := set(); err != nil {
 		log.Fatalf("%v", err)
 	}

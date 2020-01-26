@@ -49,6 +49,7 @@ func set() error {
 }
 
 func main() {
+	fmt.Println("起動")
 	if err := set(); err != nil {
 		log.Fatalf("%v", err)
 	}

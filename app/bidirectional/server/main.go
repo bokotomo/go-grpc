@@ -27,7 +27,7 @@ func request(stream pb.Chat_ChatServer, message string) error {
 	})
 }
 
-// Chat is
+// Chat クライアントから受け取った言葉に、言葉を返す
 func (s *ServerBidirectional) Chat(stream pb.Chat_ChatServer) error {
 	for {
 		in, err := stream.Recv()
@@ -62,6 +62,7 @@ func set() error {
 }
 
 func main() {
+	fmt.Println("起動")
 	if err := set(); err != nil {
 		log.Fatalf("%v", err)
 	}
