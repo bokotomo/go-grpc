@@ -22,7 +22,7 @@ type server struct {
 func (s *server) Notification(req *pb.NotificationRequest, stream pb.Notification_NotificationServer) error {
 	fmt.Println("リクエスト受け取った")
 	for i:=int32(0);i<req.GetNum();i++ {
-		message := fmt.Sprintf("Num: %d", i)
+		message := fmt.Sprintf("%d", i)
 		if err := stream.Send(&pb.NotificationReply{
 			Message: message,
 		}); err != nil {
